@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Memory Gallery</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;1,400&display=swap');
+:root{--bg:#f5efe6;--ink:#4a3e37;--muted:#8a7b70;--border:#e2d6c8;--rose:#b9877d}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'DM Sans',sans-serif}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.13;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.3'/%3E%3C/svg%3E")}
+header{max-width:1100px;margin:auto;padding:25px 22px;display:flex;justify-content:space-between;align-items:center}
+.logo{font-family:'Playfair Display',serif;font-size:20px;letter-spacing:.04em}
+.header-note{font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted)}
+main{max-width:1100px;margin:auto;padding:25px 22px 85px}
+.intro{text-align:center;padding:48px 0 54px}
+.kicker{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--rose)}
+h1{font:500 clamp(38px,7vw,68px)/1.12 'Playfair Display',serif;margin:15px 0}
+.intro p{font:italic 17px/1.7 'Playfair Display',serif;color:var(--muted);margin:0 auto;max-width:500px}
+.toolbar{display:flex;justify-content:center;gap:10px;margin:25px 0 48px;flex-wrap:wrap}
+button{border:1px solid #b99a8f;background:transparent;color:var(--ink);padding:11px 17px;border-radius:30px;cursor:pointer;font:inherit;transition:.2s}
+button:hover{background:#eaded4}
+.primary{background:var(--rose);border-color:var(--rose);color:white}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:32px 24px}
+.gallery-item{min-width:0}
+.title-input{width:100%;border:0;border-bottom:1px solid transparent;background:transparent;text-align:center;color:var(--ink);font:500 21px 'Playfair Display',serif;padding:7px 3px 11px;outline:none}
+.title-input:focus{border-bottom-color:var(--rose)}
+.frame{background:#fffaf3;padding:12px 12px 16px;box-shadow:0 10px 30px #56463b0c;position:relative}
+.photo-area{aspect-ratio:4/4.6;background:linear-gradient(135deg,#e7d9cb,#d6c5b6);position:relative;overflow:hidden;display:grid;place-items:center;text-align:center;color:#7d6d62}
+.photo-area img{display:none;width:100%;height:100%;object-fit:cover;position:absolute;inset:0}
+.photo-area .hint{font-size:13px;line-height:1.7;padding:15px}
+.photo-area input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
+.caption{margin:14px 3px 0;color:var(--muted);font:italic 14px/1.6 'Playfair Display',serif;min-height:22px;outline:none;text-align:center}
+.caption:focus{border-bottom:1px dashed var(--rose)}
+.small-tip{text-align:center;font-size:12px;color:var(--muted);margin:30px 0 0}
+footer{text-align:center;color:#a18f82;font-size:11px;letter-spacing:.15em;margin:65px 0 0}
+@media(max-width:760px){.grid{grid-template-columns:repeat(2,1fr);gap:22px 14px}main{padding:15px 15px 70px}header{padding:18px 15px}.intro{padding:50px 0 38px}.frame{padding:9px 9px 13px}.title-input{font-size:18px}}
+@media(max-width:440px){.grid{grid-template-columns:1fr 1fr;gap:17px 10px}.photo-area{aspect-ratio:3/4}.title-input{font-size:16px}.caption{font-size:13px}}
+
+.login-overlay{position:fixed;inset:0;background:#f5efe6;z-index:10;display:flex;align-items:center;justify-content:center;padding:20px}
+.login-box{max-width:360px;width:100%;background:#fffaf3;border:1px solid #e2d6c8;padding:35px 25px;text-align:center;box-shadow:0 20px 60px #56463b15}
+.login-box .flower{font-size:28px;color:#b9877d}
+.login-box h2{font:500 30px 'Playfair Display',serif;margin:12px 0}
+.login-box p{font:italic 15px/1.6 'Playfair Display',serif;color:var(--muted)}
+.login-box input{width:100%;margin:15px 0;padding:12px;text-align:center;border:1px solid var(--border);background:transparent;border-radius:6px;font:inherit;letter-spacing:.2em}
+.login-box button{width:100%}
+.login-error{font-size:12px;color:#b05e58;min-height:18px;margin-top:9px}
+.heart-wrap{display:none;position:fixed;inset:0;z-index:9;background:var(--bg);text-align:center;align-items:center;justify-content:center;flex-direction:column;margin:0;padding:24px;}
+body.heart-stage header,body.heart-stage main>.intro,body.heart-stage main>.grid,body.heart-stage main>.small-tip,body.heart-stage main>footer{display:none!important;}
+body.gallery-stage .heart-wrap{display:none!important;}
+body.gallery-stage header,body.gallery-stage main>.intro,body.gallery-stage main>.grid,body.gallery-stage main>.small-tip,body.gallery-stage main>footer{display:initial;}
+body.gallery-stage header{display:flex;}
+body.gallery-stage main>.intro{display:block;}
+body.gallery-stage main>.grid{display:grid;}
+body.gallery-stage main>.small-tip,body.gallery-stage main>footer{display:block;}
+.heart-button{position:relative;border:0;background:transparent;padding:0;cursor:pointer;display:inline-grid;place-items:center;width:min(230px,60vw);height:min(210px,55vw);transition:transform .25s;}
+.heart-button:hover{background:transparent;transform:scale(1.05)}
+.heart-shape{font-size:clamp(110px,30vw,190px);line-height:1;color:#c9828a;filter:drop-shadow(0 12px 18px #8f59622b);transition:transform .25s;}
+.heart-button:active .heart-shape{transform:scale(.92)}
+.heart-name{position:absolute;inset:0;display:grid;place-items:center;color:#fffaf3;font:italic 24px 'Playfair Display',serif;text-shadow:0 2px 6px #8d4d5a55;pointer-events:none;}
+.heart-note{font:italic 15px 'Playfair Display',serif;color:var(--muted);margin-top:8px;min-height:24px;}
+.heart-pop{animation:heartPop .45s ease;}
+@keyframes heartPop{0%{transform:scale(.85)}55%{transform:scale(1.14)}100%{transform:scale(1)}}
+</style>
+</head>
+<body>
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-box">
+    <div class="flower">✿</div>
+    <div class="kicker">a little secret</div>
+    <h2>Just for you</h2>
+    <p>Some memories are meant for someone special.<br>Enter the secret code to open them ♡</p>
+    <input type="password" id="pinInput" inputmode="numeric" maxlength="4" placeholder="••••" aria-label="Password">
+    <button class="primary" id="loginBtn">Open memories ♡</button>
+    <div class="login-error" id="loginError"></div>
+  </div>
+</div>
+<header><div class="logo">memory gallery ♡</div><div class="header-note">a place for little moments</div></header>
+<main>
+<section class="intro">
+<div class="kicker">your own collection</div>
+<h1>Little moments, kept.</h1>
+<p>Every picture holds a story. Give each one a name, and keep the moments you want to remember.</p>
+<div class="toolbar">
+<button class="primary" id="addBtn">＋ Add photo</button>
+<button id="resetBtn">Reset gallery</button>
+</div>
+</section>
+<section class="heart-wrap" id="heartWrap">
+  <button class="heart-button" id="heartButton" aria-label="Pencet hati">
+    <span class="heart-shape">♥</span><span class="heart-name">Ian heart</span>
+  </button>
+  <div class="heart-note" id="heartNote">tap the heart ♡</div>
+</section>
+<section class="grid" id="gallery"></section>
+<p class="small-tip">Klik judul untuk mengetik · klik area foto untuk memilih foto dari perangkat</p>
+<footer>MADE OF MEMORIES · ♡</footer>
+</main>
+<script>
+const gallery=document.getElementById('gallery');
+function makeCard(title='Untitled memory',caption='A little moment to remember'){
+ const card=document.createElement('article');card.className='gallery-item';
+ card.innerHTML=`<input class="title-input" value="${title.replaceAll('"','&quot;')}" aria-label="Judul foto"><div class="frame"><div class="photo-area"><div class="hint">✧<br>Click to choose a photo</div><img alt="Gallery image"><input type="file" accept="image/*" aria-label="Pilih foto"></div><p class="caption" contenteditable="true">${caption}</p></div>`;
+ const file=card.querySelector('input[type=file]');file.addEventListener('change',ev=>{const f=ev.target.files?.[0];if(!f)return;const im=card.querySelector('img');im.src=URL.createObjectURL(f);im.style.display='block';card.querySelector('.hint').style.display='none';});
+ card.querySelector('.title-input').addEventListener('input',()=>{});
+ card.querySelector('.caption').addEventListener('input',()=>{});
+ gallery.appendChild(card);
+}
+for(let i=0;i<6;i++)makeCard(`Memory ${i+1}`,`Click here to write a little story…`);
+document.getElementById('addBtn').addEventListener('click',()=>makeCard(`New memory`,`Write something about this photo…`));
+document.getElementById('resetBtn').addEventListener('click',()=>{if(confirm('Reset gallery to blank cards?')){gallery.innerHTML='';for(let i=0;i<6;i++)makeCard(`Memory ${i+1}`,`Click here to write a little story…`);}});
+
+const loginOverlay=document.getElementById('loginOverlay');
+const pinInput=document.getElementById('pinInput');
+const loginError=document.getElementById('loginError');
+function unlockGallery(){if(pinInput.value==='1111'){loginOverlay.style.display='none';document.body.classList.add('heart-stage');document.getElementById('heartWrap').style.display='flex';}else{loginError.textContent='Hmm, that code is not quite right. Try again ♡';pinInput.value='';pinInput.focus();}}
+const heartButton=document.getElementById('heartButton');const heartNote=document.getElementById('heartNote');let heartPresses=0;heartButton.addEventListener('click',()=>{heartPresses++;heartButton.classList.remove('heart-pop');void heartButton.offsetWidth;heartButton.classList.add('heart-pop');if(heartPresses===1){heartNote.textContent='One more tap ♡';}else{heartNote.textContent='Ian ♥';document.body.classList.remove('heart-stage');document.body.classList.add('gallery-stage');setTimeout(()=>{document.getElementById('heartWrap').style.display='none';},450);}});
+document.getElementById('loginBtn').addEventListener('click',unlockGallery);
+pinInput.addEventListener('keydown',e=>{if(e.key==='Enter')unlockGallery();});
+</script>
+</body>
+</html>
